@@ -1,0 +1,9 @@
+python-dotenv
+requests
+wikipedia
+google-api-python-client
+openai
+langchain
+langchain_community
+pydantic_settings
+langchain_openai
