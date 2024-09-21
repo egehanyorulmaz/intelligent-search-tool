@@ -1,45 +1,37 @@
-from src.search_agent.tools.general_web import GoogleSearch, PerplexitySearch
-from src.search_agent.agent.agent import create_agent, run_agent
+from langchain.schema import HumanMessage
+from src.search_agent.workflow.graph import create_workflow
 from src.search_agent.utils.custom_logging import setup_logger
-from src.config import settings
-
-from langchain.agents import Tool
 
 logger = setup_logger("main")
 
-
 def main():
-    # Initialize search classes
-    google_search = GoogleSearch()
-    perplexity_search = PerplexitySearch()
-
-    # Define the tools our agent can use
-    tools = [
-        Tool(
-            name="Google Search",
-            func=google_search.search,
-            description="Useful for when you need to search for general information on the web."
-        ),
-        Tool(
-            name="Perplexity Search",
-            func=perplexity_search.search,
-            description="Useful for when you need more detailed or analytical information on a topic."
-        )
-    ]
-
-    # Create the agent
-    agent_executor = create_agent(tools)
-
-    # Example query
-    query = "Are Alex and Melissa Witkoff art collectors?"
-
-    try:
-        result = run_agent(agent_executor, query)
-        logger.info(f"Query: {query}")
-        logger.info(f"Result: {result}")
-    except Exception as e:
-        logger.error(f"An error occurred: {str(e)}")
-
+    logger.info("Starting search agent workflow")
+    chain = create_workflow()
+    
+    while True:
+        query = input("Please enter your search query (or 'quit' to exit): ")
+        if query.lower() == 'quit':
+            break
+        
+        logger.info(f"Initial query: {query}")
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            result = chain.invoke({
+                "messages": [HumanMessage(content=query)],
+                "next": "search"
+            })
+            
+            final_answer = result['messages'][-1].content
+            if "unable to answer" not in final_answer.lower():
+                break
+            logger.info(f"Attempt {attempt + 1} failed to provide a satisfactory answer. Retrying...")
+        
+        logger.info("Workflow completed")
+        logger.info(f"Final result: {final_answer}")
+        print(f"\nAnswer: {final_answer}\n")
+    
+    logger.info("Search agent workflow ended")
 
 if __name__ == "__main__":
     main()
