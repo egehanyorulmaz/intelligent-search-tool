@@ -7,3 +7,6 @@ langchain
 langchain_community
 pydantic_settings
 langchain_openai
+beautifulsoup4
+urllib3
+langgraph
