@@ -16,7 +16,6 @@ class GoogleSearch(BaseSearch):
             "key": settings.google_api_key,
             "cx": settings.google_cse_id,
             "q": query,
-            # "fields": "items(link,snippet,title,pagemap/cse_thumbnail/src)"
         }
         response = requests.get(url, params=params)
         response.raise_for_status()
@@ -55,7 +54,7 @@ class PerplexitySearch(BaseSearch):
 
         try:
             response = self.client.chat.completions.create(
-                model="llama-3-sonar-large-32k-online",
+                model="llama-3.1-sonar-small-128k-online",
                 messages=messages,
             )
             return [response.choices[0].message.content]
