@@ -3,12 +3,17 @@ import requests
 from openai import OpenAI
 import logging
 from src.config import settings
+from src.search_agent.tools.web_crawler import WebCrawler
 
 # Initialize logger
 logger = logging.getLogger("main.general_web")
 
 
 class GoogleSearch(BaseSearch):
+    def __init__(self) -> None:
+        super().__init__()
+        self._crawler: WebCrawler = WebCrawler()
+
     def search(self, query: str) -> list[dict]:
         url = "https://www.googleapis.com/customsearch/v1"
 
@@ -31,12 +36,20 @@ class GoogleSearch(BaseSearch):
             }
             search_results.append(result)
 
+        logger.debug(f"Received {len(search_results)} result from Google Search")
+        for idx, result in enumerate(search_results):
+            url = result.get("url")
+            content = self._crawler.crawl(url=url)
+            search_results[idx]["content"] = content
+
         return search_results
 
 
 class PerplexitySearch(BaseSearch):
     def __init__(self):
-        self.client = OpenAI(api_key=settings.credentials.perplexity_api_key, base_url="https://api.perplexity.ai")
+        self.client = OpenAI(api_key=settings.credentials.perplexity_api_key, 
+                             base_url="https://api.perplexity.ai",
+                             temperature=settings.perplexity.temperature)
 
     def search(self, query: str) -> list[str]:
         messages = [
@@ -54,9 +67,10 @@ class PerplexitySearch(BaseSearch):
 
         try:
             response = self.client.chat.completions.create(
-                model="llama-3.1-sonar-small-128k-online",
+                model=settings.perplexity.model,
                 messages=messages,
             )
             return [response.choices[0].message.content]
         except Exception as e:
             return [f"Error: {str(e)}"]
+        
