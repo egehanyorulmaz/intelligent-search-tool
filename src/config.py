@@ -1,19 +1,14 @@
 from pydantic_settings import BaseSettings
 from pydantic import Field, BaseModel
+from typing import Dict, Any
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from typing import Dict, Any
 
-class AgentRegistration(BaseModel):
-    name: str
-    description: str
-    function: Any
-    config: Dict[str, Any] = Field(default_factory=dict)
-
-    class Config:
-        arbitrary_types_allowed = True
+class PerplexityConfig(BaseModel):
+    model: str = "llama-3.1-sonar-small-128k-online"
+    temperature: float = 0.0
 
 class Credentials(BaseSettings):
     perplexity_api_key: str = Field(alias="PERPLEXITY_API_KEY")
@@ -29,6 +24,7 @@ class Credentials(BaseSettings):
         env_file_encoding = "utf-8"
 
 class Settings(BaseSettings):
-    credentials = Credentials()
+    credentials: Credentials = Credentials()
+    perplexity: PerplexityConfig = PerplexityConfig()
 
 settings = Settings()
