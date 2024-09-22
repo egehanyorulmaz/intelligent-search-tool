@@ -13,7 +13,31 @@ google_search = GoogleSearch()
 perplexity_search = PerplexitySearch()
 web_crawler = WebCrawler()
 
+def router_agent(state):
+    logger.info("Entering search_agent")
+    messages = state['messages']
+    user_query = messages[0].content
+
+
+
 def search_agent(state):
+    """
+    Perform a search based on the user's query.
+
+    This function processes the user's query, generates a search query, and performs searches using Google and Perplexity.
+
+    :param state: A dictionary containing the current state of the conversation.
+    :type state: dict
+    :return: A dictionary with updated messages and the next action.
+    :rtype: dict
+
+    The function does the following:
+    1. Extracts the user query from the state.
+    2. Adds date context to the query if it's about recent events.
+    3. Generates a specific search query using an AI model.
+    4. Performs searches using Google and Perplexity.
+    5. Combines and returns the search results.
+    """
     logger.info("Entering search_agent")
     messages = state['messages']
     user_query = messages[-1].content
@@ -61,6 +85,25 @@ def search_agent(state):
     }
 
 def analyze_agent(state):
+    """
+    Analyze the search results and determine the next action.
+
+    This function examines the search results, assesses their relevance to the original query,
+    and decides whether to perform a new search, crawl a specific website, or proceed to summarization.
+
+    :param state: A dictionary containing the current state of the conversation.
+    :type state: dict
+    :return: A dictionary with updated messages and the next action.
+    :rtype: dict
+
+    The function does the following:
+    1. Extracts the original query and search results from the state.
+    2. Uses an AI model to analyze the relevance of the search results.
+    3. Based on the analysis, decides to either:
+       - Perform a new search with refined keywords
+       - Crawl a specific website for more information
+       - Proceed to summarize the information
+    """
     logger.info("Entering analyze_agent")
     messages = state['messages']
     original_query = messages[0].content
@@ -97,6 +140,23 @@ def analyze_agent(state):
         }
 
 def crawl_agent(state):
+    """
+    Crawl a specific website for more information.
+
+    This function extracts a URL from the previous message and uses a web crawler to fetch
+    additional information from that website.
+
+    :param state: A dictionary containing the current state of the conversation.
+    :type state: dict
+    :return: A dictionary with updated messages and the next action.
+    :rtype: dict
+ı
+    The function does the following:
+    1. Extracts the URL to crawl from the previous message.
+    2. Uses a web crawler to fetch information from the URL.
+    3. If successful, adds the crawled information to the messages and proceeds to summarization.
+    4. If unsuccessful, logs the error and returns to the analyze agent for the next action.
+    """
     logger.info("Entering crawl_agent")
     messages = state['messages']
     url = messages[-1].content.split("http", 1)[-1].split()[0]
