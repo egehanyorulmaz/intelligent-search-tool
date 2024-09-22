@@ -13,8 +13,8 @@ class GoogleSearch(BaseSearch):
         url = "https://www.googleapis.com/customsearch/v1"
 
         params = {
-            "key": settings.google_api_key,
-            "cx": settings.google_cse_id,
+            "key": settings.credentials.google_api_key,
+            "cx": settings.credentials.google_cse_id,
             "q": query,
         }
         response = requests.get(url, params=params)
@@ -36,7 +36,7 @@ class GoogleSearch(BaseSearch):
 
 class PerplexitySearch(BaseSearch):
     def __init__(self):
-        self.client = OpenAI(api_key=settings.perplexity_api_key, base_url="https://api.perplexity.ai")
+        self.client = OpenAI(api_key=settings.credentials.perplexity_api_key, base_url="https://api.perplexity.ai")
 
     def search(self, query: str) -> list[str]:
         messages = [
