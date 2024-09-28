@@ -4,12 +4,13 @@ from openai import OpenAI
 import logging
 from src.config import settings
 from src.search_agent.tools.web_crawler import WebCrawler
+from src.search_agent.utils.custom_funcs import ContentProcessor
 
 # Initialize logger
 logger = logging.getLogger("main.general_web")
 
 
-class GoogleSearch(BaseSearch):
+class GoogleSearch(BaseSearch, ContentProcessor):
     def __init__(self) -> None:
         super().__init__()
         self._crawler: WebCrawler = WebCrawler()
@@ -40,7 +41,9 @@ class GoogleSearch(BaseSearch):
         for idx, result in enumerate(search_results):
             url = result.get("url")
             content = self._crawler.crawl(url=url)
-            search_results[idx]["content"] = content
+            main_content = content.get("main_content", "")
+            truncated_content = self.truncate_content(main_content)
+            result["content"] = truncated_content
 
         return search_results
 
@@ -48,8 +51,7 @@ class GoogleSearch(BaseSearch):
 class PerplexitySearch(BaseSearch):
     def __init__(self):
         self.client = OpenAI(api_key=settings.credentials.perplexity_api_key, 
-                             base_url="https://api.perplexity.ai",
-                             temperature=settings.perplexity.temperature)
+                             base_url="https://api.perplexity.ai")
 
     def search(self, query: str) -> list[str]:
         messages = [
