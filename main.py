@@ -1,8 +1,18 @@
 from langchain.schema import HumanMessage
 from src.search_agent.workflow.graph import create_workflow
 from src.search_agent.utils.custom_logging import setup_logger
+from src.search_agent.tools.general_web import GoogleSearch
+import logging
 
 logger = setup_logger("main")
+
+web_logger = logging.getLogger("main.general_web")
+web_logger.setLevel("DEBUG")
+
+def test_google_search():
+    google_search = GoogleSearch()
+    results = google_search.search("Who won the last Istanbul derby yesterday? ")
+    print(results)
 
 def main():
     logger.info("Starting search agent workflow")
@@ -34,4 +44,4 @@ def main():
     logger.info("Search agent workflow ended")
 
 if __name__ == "__main__":
-    main()
+    test_google_search()

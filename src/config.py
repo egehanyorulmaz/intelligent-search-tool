@@ -23,8 +23,15 @@ class Credentials(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
+class Config(BaseSettings):
+    word_threshold: int = Field(
+        default=1000,
+        description="Number of words to truncate the content to when using the web search tool"
+    )
+
 class Settings(BaseSettings):
     credentials: Credentials = Credentials()
     perplexity: PerplexityConfig = PerplexityConfig()
+    config: Config = Config()
 
 settings = Settings()
