@@ -11,26 +11,20 @@ class HTMLProcessor:
         self.base_url = url
 
     def preprocess_html(self, html_text):
-        # Parse HTML
         soup = BeautifulSoup(html_text, 'html.parser')
 
-        # Remove script and style elements
         for script in soup(["script", "style"]):
             script.decompose()
 
-        # Extract text
         text = soup.get_text()
-
+        
         # Break into lines and remove leading and trailing space on each
         lines = (line.strip() for line in text.splitlines())
 
         # Break multi-headlines into a line each
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-
-        # Remove blank lines
+        
         text = '\n'.join(chunk for chunk in chunks if chunk)
-
-        # Remove excessive newlines
         text = re.sub(r'\n{3,}', '\n\n', text)
 
         return text
